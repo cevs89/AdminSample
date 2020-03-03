@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block extra_css %}
+<link href="{% static "css/lib/bootstrap-tagsinput.css" %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Questions.</h2>
+            <h4>Encuenta: {{query_set.title}}</h4>
+          </div>
+          <div class="body">
+            <form class="post-form" enctype="multipart/form-data" method="POST">{% csrf_token %}
+              <div class="row clearfix">
+                <input type="hidden" name="get_id" value="{{get_id}}">
+                <input type="hidden" name="get_id_surveys" value="{{query_set.pk}}">
+
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label for="{{form.type_questions.id_for_label }}" class="form-label">{{form.type_questions.label}}</label>
+                    {{ form.type_questions }}
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label for="{{form.options_answer.id_for_label }}" class="form-label">Tipo de respuestas</label>
+                      {{ form.options_answer }}
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group form-float">
+                    <div class="form-line">
+                      <label class="form-label">{{form.position.label}}</label>
+                      {{ form.position }}
+                    </div>
+                    {% if form.position.errors %}
+                      {% for error in form.position.errors %}
+                        <span class="font-bold col-red">{{ error|escape }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="form-group form-float">
+                    <div class="form-line">
+                      <label class="form-label">{{form.pages.label}}</label>
+                      {{ form.pages }}
+                    </div>
+                    {% if form.pages.errors %}
+                      {% for error in form.pages.errors %}
+                        <span class="font-bold col-red">{{ error|escape }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                </div>
+
+
+                <div class="col-sm-12" id="block_question_html">
+                  <div class="form-group form-float">
+                    <div class="form-line">
+                      {{ form.question_html }}
+                    </div>
+                    {% if form.question_html.errors %}
+                      {% for error in form.question_html.errors %}
+                        <span class="font-bold col-red">{{ error|escape }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                </div>
+
+
+                <div class="col-sm-12" id="block_question_text">
+                  <div class="form-group form-float">
+                    <div class="form-line">
+                      <label class="form-label">{{form.question_text.label}}</label>
+                      {{ form.question_text }}
+                    </div>
+                    {% if form.question_text.errors %}
+                      {% for error in form.question_text.errors %}
+                        <span class="font-bold col-red">{{ error|escape }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+
+                  <div class="form-group form-float">
+                    <div class="form-line">
+                      <label class="form-label">{{form.comment.label}}</label>
+                      {{ form.comment }}
+                    </div>
+                    {% if form.comment.errors %}
+                      {% for error in form.comment.errors %}
+                        <span class="font-bold col-red">{{ error|escape }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group" id="block_quetions_image">
+                      <div class="form-line">
+                        {{form.question_image.label}}
+                        {{ form.question_image }}
+                      </div>
+                      {% if form.question_image.errors %}
+                        {% for error in form.question_image.errors %}
+                          <span class="font-bold col-red">{{ error|escape }}</span>
+                        {% endfor %}
+                      {% endif %}
+                  </div>
+                </div>
+
+
+                <div id="block_answers">
+                  <div class="col-sm-9" id="ansewrs_tag">
+                    <p>{{form.answers.label}}</p>
+                    <div class="form-group demo-tagsinput-area">
+                      <div class="form-line">
+                        {{ form.answers }}
+                      </div>
+                      {% if form.answers.errors %}
+                        {% for error in form.answers.errors %}
+                          <span class="font-bold col-red">{{ error|escape }}</span>
+                        {% endfor %}
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="col-sm-3">
+                    <div class="form-group">
+                        <p>{{form.others.label}}</p>
+                        <div class="demo-switch">
+                            <div class="switch">
+                              <label for="{{form.others.id_for_label }}" class="form-label">NO{{ form.others }}<span class="lever"></span>SI</label>
+                            </div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+              <hr>
+              <div class="text-right">
+                <button type="submit" class="btn btn-block btn-lg btn-success">Save</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static "js/lib/bootstrap-tagsinput.js" %}"></script>
+<script src="{% static "js/lib/ckeditor/ckeditor.js" %}"></script>
+
+<script type="text/javascript">
+
+  $(document).ready(function() {
+    CKEDITOR.replace('ckeditor');
+    CKEDITOR.config.height = 300;
+
+    // init
+    $("#id_type_questions").on("change", function() {
+      // Text or Image
+      var get_value = $('#id_type_questions').val();
+      if (get_value === '1' || get_value === '3') {
+        $("#block_question_text").css('display', 'none');
+        $("#block_question_html").css('display', 'none');
+        $("#block_quetions_image").css('display', 'block');
+        // required validate
+        $("#id_question_image").attr('required', 'true');
+        $("#id_question_text").removeAttr('required');
+
+
+      }else if (get_value === '5') {
+        $("#block_question_html").css('display', 'block');
+        $("#block_question_text").css('display', 'none');
+        $("#block_quetions_image").css('display', 'none');
+        $("#id_question_text").removeAttr('required');
+        $("#id_question_image").removeAttr('required');
+
+      }else {
+        $("#block_question_text").css('display', 'block');
+        $("#block_quetions_image").css('display', 'none');
+        $("#block_question_html").css('display', 'none');
+
+        // required validate
+        $("#id_question_text").attr('required', 'true');
+        $("#id_question_image").removeAttr('required');
+      }
+    });
+
+    $("#id_options_answer").on("change", function(){
+        var get_value = $('#id_options_answer').val();
+        if (get_value === '3') {
+          $("#ansewrs_tag").css('display', 'none');
+          $("#id_answers").removeAttr('required');
+
+        }else {
+          $("#ansewrs_tag").css('display', 'block');
+        }
+        if (get_value === '2') {
+          $("#block_answers").css('display', 'none');
+          $("#id_answers").removeAttr('required');
+        }else {
+          $("#block_answers").css('display', 'block');
+        }
+    });
+
+    // validar al refrescar
+
+    if ($('#id_options_answer').val() == 3) {
+      $("#ansewrs_tag").css('display', 'none');
+      $("#id_answers").removeAttr('required');
+
+    }
+
+    if ($('#id_options_answer').val() == 2) {
+      $("#block_answers").css('display', 'none');
+      $("#id_answers").removeAttr('required');
+    }else {
+      $("#block_answers").css('display', 'block');
+      $("#id_answers").attr('required', 'true');
+    };
+
+    if ($('#id_type_questions').val() === '1') {
+      $("#block_question_text").css('display', 'none');
+      $("#block_question_html").css('display', 'none');
+
+      $("#block_quetions_image").css('display', 'block');
+      // required validate
+      $("#id_question_image").attr('required', 'true');
+      $("#id_question_text").removeAttr('required');
+
+    }else if ($('#id_type_questions').val() === '5'){
+      $("#block_question_html").css('display', 'block');
+      $("#block_question_text").css('display', 'none');
+      $("#block_quetions_image").css('display', 'none');
+
+      $("#id_question_text").removeAttr('required');
+      $("#id_question_image").removeAttr('required');
+    }else {
+      $("#block_question_text").css('display', 'block');
+      $("#block_quetions_image").css('display', 'none');
+      $("#block_question_html").css('display', 'none');
+
+      // required validate
+      $("#id_question_text").attr('required', 'true');
+      $("#id_question_image").removeAttr('required');
+
+    }
+
+  });
+
+</script>
+{% endblock %}

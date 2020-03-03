@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block extra_css %}
+<link href="{% static "css/lib/dataTables.bootstrap.css" %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <p class="header-dropdown m-r--5"><a href="{% url 'create_recon' %}" class="btn btn-lg btn-primary">Create Recognition</a></p>
+            <h2>List Recognition</h2>
+          </div>
+          <div class="body">
+            <div class="tablet_data">
+              <table class="table table-bordered table-responsive table-striped table-hover js-basic-example dataTable">
+                <thead>
+                  <tr>
+                    <th>Label</th>
+                    <th>Descripcion</th>
+                    <th>Status</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if object_list %}
+                    {% for value in object_list %}
+                    <tr>
+                      <td>{{value.label}}</td>
+                      <td>{{value.descripcion}}</td>
+                      <td class="text-center">
+                        {% if value.is_active %}
+                          <span class="font-12 label label-success">Active</span>
+                        {% else %}
+                          <span class="font-12 label label-danger">Inactive</span>
+                        {% endif %}
+                      </td>
+                      <td>{{value.get_state_display}}</td>
+                      <td class="text-center">
+                        <a href="{% url 'edit_recon' id=value.pk %}" class="btn btn-sm btn-info">
+                          <i class="material-icons">visibility</i>
+                        </a>
+                        <button onclick="DeleteRecognition({{value.pk}})" class="btn btn-sm btn-danger">
+                          <i class="material-icons">delete</i>
+                        </button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static "js/jquery.dataTables.js" %}"></script>
+  <script src="{% static "js/lib/dataTables.bootstrap.min.js" %}"></script>
+  <script src="{% static "js/lib/jquery-datatable.js" %}"></script>
+
+  <script type="text/javascript">
+  function DeleteRecognition(pk){
+    swal({
+          title: "Eliminar Registro",
+          text: "¿Esta seguro que desea hacer esta acción?",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55",
+          confirmButtonText: "Aceptar",
+          cancelButtonText: "Cancelar",
+          closeOnConfirm: false,
+          closeOnCancel: false
+      },
+      function(isConfirm){
+        if (isConfirm){
+          request_url = '/dashboard/recognition/delete/' + pk + '/'
+          $.ajax({
+              url: request_url,
+              success: function(data){
+               swal({title: "OK", text: data.msg, type: "success", timer: 6000, allowEscapeKey:true});
+               location.reload();
+             },
+             error: function( jqXHR, textStatus, errorThrown ) {
+                swal({title: "Error", text: jqXHR.responseJSON.msg, type: "error", timer: 6000, allowEscapeKey:true});
+              }
+            })
+            return true;
+        }
+        else{
+          swal({title: "Cancel", text: 'Operacion Cancelada', type: "warning", timer: 800, allowEscapeKey:true});
+          return false;
+        }
+      })
+  }
+  </script>
+
+{% endblock %}

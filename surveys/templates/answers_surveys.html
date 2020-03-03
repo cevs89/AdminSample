@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block extra_css %}
+<style media="screen">
+  .wizard>.content{display:block;min-height:20em;overflow-y: auto;position:relative}
+</style>
+{% endblock %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Responder Encuesta: <b>{{query_survey.title}}</b></h2>
+            <span>{{query_survey.descripcion}}</span><br>
+          </div>
+          <div class="body">
+            <form id="wizard_with_validation" class="post-form" method="POST">{% csrf_token %}
+              <input type="hidden" name="id_survey" value="{{query_survey.pk}}">
+              {% if query_question %}
+                {% for pages in list_pages %}
+                  <h3>Pages {{pages}}</h3>
+                   <fieldset>
+                     {% for value in objct_list %}
+                       {% if value.pages == pages %}
+                         <input type="hidden" name="get_id_questions" value="{{value.id_question}}">
+                         {% for relations in value.data_redirection %}
+                            <input type="hidden" name="id_answer_{{relations.when_answer_id}}" value="{{relations.when_answer_id}}">
+                         {% endfor %}
+                         <div id="pasition_{{value.position}}"></div>
+
+                         {% if value.type_question_id == 0 or value.type_question_id == 2 or value.type_question_id == 4 %}
+                           <h2>{% if value.type_question_id == 4 %}<a target="_blank" href="{{value.quetions}}">{{value.quetions|truncatechars:40}}</a>{% else %}{{value.quetions}}{% endif %}</h2>
+                         {% elif value.type_question_id == 1 or value.type_question_id == 3 %}
+                           <img src="/media/{{value.quetions}}" alt="" width="300"><br><br>
+                         {% else %}
+                           {{value.quetions|safe}}
+                         {% endif %}
+                         {% if value.comment %}
+                         <small>{{value.comment}}</small>
+                         {% endif %}
+
+                           {% if not value.options_answer_id == 2 %}
+                             {% for answer in value.answer %}
+                               {% if value.options_answer_id == 0 or value.options_answer_id == 3 %}
+                               <div>
+                                 <input type="radio" id="{{answer.id_answer}}" name="grupo_{{value.id_question}}" value="{{answer.name_answer}}">
+                                 <label for="{{answer.id_answer}}">{{answer.name_answer}}</label>
+                               </div>
+                               {% elif value.options_answer_id == 1 %}
+                               <div>
+                                 <input id="{{answer.id_answer}}_{{answer.name_answer}}" type="checkbox" value="{{answer.name_answer}}" name="grupo_checkbox">
+                                 <label for="{{answer.id_answer}}_{{answer.name_answer}}" class="form-label">{{answer.name_answer}}</label>
+                               </div>
+                               {% endif %}
+                             {% endfor %}
+                           {% else %}
+                             <div class="form-group form-float">
+                               <div class="form-line">
+                                 <label class="form-label">Respuesta</label>
+                                 <input type="text" class="form-control" name="answers_text_{{value.id_question}}">
+                               </div>
+                             </div>
+                           {% endif %}
+                           <div id="input_radio_select_{{value.id_question}}">
+                           </div>
+                           <hr>
+                       {% endif %}
+                     {% endfor %}
+                   </fieldset>
+                {% endfor %}
+
+              {% else %}
+                <p class="text-center">No hay Preguntas asociadas a esta encuesta, si quiere agregar una pregunta <a href="{% url 'create_questions_survey' id=query_survey.pk %}">pulse aquí</a></p>
+              {% endif %}
+             </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+
+<script type="text/javascript">
+var urlpost = "{% url 'answers_questions_survey' id=query_survey.pk %}";
+var list_suvey = "{% url 'list_survey' %}";
+var surveys_questions_ajax = "{% url 'surveys_questions_ajax' %}";
+
+function AddInputField(id, id_answer_si, id_answer_no){
+  $('input:radio[id='+id_answer_no+']').off();
+  $('input:radio[id='+id_answer_no+']').on("click", function(){
+    $("#input_radio_select_" + String(id)).html("")
+  });
+  $("#input_radio_select_" + String(id)).html(`
+    <label for="id_questions_`+id+`" class="form-label">Pedido Sugerido</label>
+    <input id="id_questions_`+id+`" type="number" class="form-control" name="answers_qustion">
+  `);
+};
+
+</script>
+<script src="{% static "js/lib/jquery.validate.js" %}"></script>
+<script src="{% static "js/lib/jquery.steps.js" %}"></script>
+<script src="{% static "js/form-wizard.js" %}"></script>
+
+
+<script type="text/javascript">
+
+
+$(function() {
+  var id_survey = $("[name=id_survey]").val();
+  var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+  // redirect
+  $.ajax({
+    type: "POST",
+    url: surveys_questions_ajax,
+    headers:{"X-CSRFToken": $crf_token},
+    data: {"id_survey": id_survey, "action": "redirect"},
+    success: function(data){
+      if (data.length != 0) {
+        for (var i = 0; i < data.length; i++) {
+
+          var page_position_get = data[i].pages;
+          var when = data[i].data_redirection[0].when
+          var pages = data[i].data_redirection[0].page_redirect
+          var position = data[i].data_redirection[0].position_redirect
+          var id_answers = parseInt($("[name=id_answer_"+when+"]").val())
+
+          if (when === id_answers) {
+            $("#" + id_answers).attr('onclick', 'RedirectOption('+pages +',' + position +','+ page_position_get+');')
+            $("#" + id_answers).addClass('btn_redirect')
+          };
+
+        } // For
+      } // If data length
+    } // Success
+  }); // ajax One
+
+  //Action Add Field
+  $.ajax({
+    type: "POST",
+    url: surveys_questions_ajax,
+    headers:{"X-CSRFToken": $crf_token},
+    data: {"id_survey": id_survey, "action": "addfield"},
+    success: function(data){
+      if (data.length != 0) {
+        for (var i = 0; i < data.length; i++) {
+          var otros = data[i].otros;
+          for (var a = 0; a < data[i].answer.length; a++) {
+            var id_answer_si = data[i].answer[0].id_answer
+            var id_answer_no = data[i].answer[1].id_answer
+            var otros = data[i].otros;
+            var id_question = data[i].id_question;
+            //
+            $("#" + id_answer_si).attr('onchange', 'AddInputField('+id_question+ ',' +id_answer_si+ ','+id_answer_no+');')
+
+          }
+
+        } // For
+      } // If data length
+    } // Success
+  }); // ajax two
+
+});
+
+function goToId(idName){
+  if($("#"+idName).length){
+    var target_offset = $("#"+idName).offset();
+    $('html,body').animate({scrollTop:target_offset.top},{duration:"slow"});
+  }
+};
+
+function RedirectOption(pages, position, page_stay){
+  var ir_page = (pages < page_stay) ? page_stay - pages : pages - page_stay
+  if (pages < page_stay) {
+    n = 0;
+    while (n < ir_page) {
+      n ++;
+      $("#wizard_with_validation").steps("previous");
+    }
+  }else{
+    n = 0;
+    while (n < ir_page) {
+      n ++;
+      $("#wizard_with_validation").steps("next");
+    }
+  }
+  goToId("pasition_" + String(position));
+};
+</script>
+{% endblock %}

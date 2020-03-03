@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block extra_css %}
+<link href="{% static "css/lib/bootstrap-select.min.css" %}" rel="stylesheet">
+
+{% endblock %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h3>{{query_sert.survey.title}}</h3>
+            <span>Pagina: {{query_sert.pages}}</span><br>
+            <h2>{{query_sert.position}}.- {{query_sert.question_text}}</h2>
+          </div>
+          <div class="body">
+
+            <form class="post-form" method="POST">{% csrf_token %}
+              <div class="row clearfix">
+                <input type="hidden" name="id_question" value="{{id_question}}">
+                <input type="hidden" name="id_survey" value="{{id_survey}}">
+
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label for="id_when_answer" class="form-label">Cuando seleccione</label>
+                      <select id="id_when_answer" class="form-control selectpicker" name="when_answer" required>
+                      	<option value="" selected="selected">---------</option>
+                        {% for option in query_option.ansewrs_options.all %}
+                          <option value="{{option.pk}}">{{option.name_answer}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label for="id_questions_redirect" class="form-label">Relacion</label>
+
+                    <select id="id_questions_redirect" class="form-control show-tick" data-live-search="true" name="questions_redirect" required>
+                    	<option value="" selected="selected">---------</option>
+                      {% for qustions in form %}
+                        <option value="{{qustions.pk}}">Pagina {{qustions.pages}} - {{qustions.question_text}}</option>
+                      {% endfor %}
+                    </select>
+
+                  </div>
+                </div>
+
+              </div>
+              <hr>
+              <div class="text-right">
+                <button type="submit" class="btn btn-block btn-lg btn-success">Guardar</button>
+              </div>
+            </form>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static "js/lib/bootstrap-select.min.js" %}"></script>
+
+{% endblock %}

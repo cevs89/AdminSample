@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block extra_css %}
+<style media="screen">
+  .pagination{
+    padding: 0;
+    margin: 0;
+    padding: 10px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="text-right p-b-10">
+          <a class="btn btn-md btn-success" href="{% url 'create_questions_survey' id=query_survey.pk %}">Nueva Pregunta</a>
+          <a class="btn btn-md btn-info" href="{% url 'list_survey' %}">Encuestas</a>
+        </div>
+        <div class="card">
+          <div class="header">
+            <h2>Details Surveys: <b>{{query_survey.title}}</b></h2>
+            <span>{{query_survey.descripcion}}</span><br>
+          </div>
+          <nav class="text-center">
+          <ul class="pagination">
+            {% if page_prev %}
+              <li>
+                  <a href="?page={{page_prev}}">
+                      Atras
+                  </a>
+              </li>
+            {% endif %}
+
+              {% for pages in list_pages %}
+                <li {% if page_stay == pages %}class="active"{% endif %}><a href="?page={{pages}}" class="waves-effect">{{pages}}</a></li>
+              {% endfor %}
+
+                {% if page_next %}
+                  <li>
+                    <a href="?page={{page_next}}" class="waves-effect">
+                        Siguiente
+                    </a>
+                  </li>
+                {% endif %}
+          </ul>
+          </nav>
+          <div class="body">
+            {% if query_question %}
+
+              {% for value in objct_list %}
+                  {% if value.type_question_id == 0 or value.type_question_id == 2 or value.type_question_id == 4 %}
+                    <h2>{% if value.type_question_id == 4 %}<a href="{{value.quetions}}">{{value.quetions|truncatechars:40}}</a>{% else %}{{value.quetions}}{% endif %}</h2>
+                  {% elif value.type_question_id == 1 or value.type_question_id == 3 %}
+                    <img src="/media/{{value.quetions}}" alt="" width="400"><br><br>
+                  {% else %}
+                    {{value.quetions|safe}}
+                  {% endif %}
+                  {% if value.comment %}
+                  <p>{{value.comment}}</p>
+                  <hr>
+                  {% endif %}
+                  <p>Pagina: <b>{{value.pages}}</b>, Posicion: <b>{{value.position}}</b></p>
+                  <p>Tipo de Respuestas: <b>{{value.options_answer}}</b></p>
+                  <p>Otros: <b>{% if value.others %}SI{% else %}NO{% endif %}</b></p>
+
+                  <p>Opciones de Respuestas:</p>
+                  {% if not value.options_answer_id == 2 %}
+                    {% for answer in value.answer %}
+                    <ul>
+                      <li>{{answer}}</li>
+                    </ul>
+                    {% endfor %}
+                  {% else %}
+                    <p><b>{{value.answer}}</b></p>
+                  {% endif %}
+
+                  <p>Relacion para redireccion: <b>{% if value.redireccion %}SI{% else %}NO{% endif %}</b></p>
+                  {% if value.data_redirection %}
+                    {% for relations in value.data_redirection %}
+                      <p><b>Cuando Seleccione:</b> {{relations.when_answer}}</p>
+                      <p><b>Redireccion hacia:</b> {{relations.questions_redirect}}</p>
+                    {% endfor %}
+                  {% endif %}
+                  <hr>
+                  <div class="text-right">
+                    {% if not value.data_redirection %}
+                      <a href="{% url 'relationship_questions' id=query_survey.id id_question=value.id_question %}" class="btn btn-lg btn-primary">Hacer Redireccion</a>
+                    {% endif %}
+                    <button class="btn btn-lg btn-danger" onclick="DeleteQuestions({{value.id_question}}, {{query_survey.id}})">Delete</button>
+                  </div>
+                  <hr>
+              {% endfor %}
+            {% else %}
+            <p class="text-center">No hay Preguntas asociadas a esta encuesta, si quiere agregar una pregunta <a href="{% url 'create_questions_survey' id=query_survey.pk %}">pulse aquí</a></p>
+            {% endif %}
+
+            <nav class="text-center">
+            <ul class="pagination">
+              {% if page_prev %}
+                <li>
+                    <a href="?page={{page_prev}}">
+                        Atras
+                    </a>
+                </li>
+              {% endif %}
+
+                {% for pages in list_pages %}
+                  <li {% if page_stay == pages %}class="active"{% endif %}><a href="?page={{pages}}" class="waves-effect">{{pages}}</a></li>
+                {% endfor %}
+
+                  {% if page_next %}
+                    <li>
+                      <a href="?page={{page_next}}" class="waves-effect">
+                          Siguiente
+                      </a>
+                    </li>
+                  {% endif %}
+            </ul>
+            </nav>
+            <!--Page {{ page_stay }} of {{ of_page }}-->
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+  <script type="text/javascript">
+  var objct_list = "{{objct_list}}";
+  var id_seruvey_get = "{{query_survey.pk}}";
+  var page_stay = "{{page_stay}}";
+
+  if (objct_list.length === 2) {
+    var result_page = ++page_stay
+    window.location.replace("/dashboard/survey/"+id_seruvey_get+"/details/?page=" + result_page);
+  }
+
+  function DeleteQuestions(pk, id_survey){
+    swal({
+          title: "Eliminar Pregunta",
+          text: "¿Esta seguro que desea hacer esta acción?",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55",
+          confirmButtonText: "Aceptar",
+          cancelButtonText: "Cancelar",
+          closeOnConfirm: false,
+          closeOnCancel: false
+      },
+      function(isConfirm){
+        if (isConfirm){
+          request_url = '/dashboard/survey/questions/'+ pk +'/delete/'
+          $.ajax({
+              url: request_url,
+              success: function(data){
+               swal({title: "OK", text: data.msg, type: "success", timer: 6000, allowEscapeKey:true});
+               window.location.replace("/dashboard/survey/"+id_survey+"/details/");
+             },
+             error: function( jqXHR, textStatus, errorThrown ) {
+                swal({title: "Error", text: jqXHR.responseJSON.msg, type: "error", timer: 6000, allowEscapeKey:true});
+              }
+            })
+            return true;
+        }
+        else{
+          swal({title: "Cancel", text: 'Operacion Cancelada', type: "warning", timer: 800, allowEscapeKey:true});
+          return false;
+        }
+      })
+  }
+  </script>
+{% endblock %}

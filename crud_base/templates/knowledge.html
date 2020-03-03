@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>knowledge</h2>
+            <ul class="header-dropdown m-r--5">
+              <li class="dropdown">
+                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  <i class="material-icons">more_vert</i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                  <li><a href="javascript:void(0);">Action</a></li>
+                  <li><a href="javascript:void(0);">Another action</a></li>
+                  <li><a href="javascript:void(0);">Something else here</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="body">
+            <form class="post-form" enctype="multipart/form-data" method="POST">{% csrf_token %}
+              <div class="row clearfix">
+                <input type="hidden" name="get_id" value="{{get_id}}">
+                  <div class="col-sm-12">
+                      <div class="form-group form-float">
+                          <div class="form-line">
+                            <label class="form-label">{{form.title.label}}</label>
+                            {{ form.title }}
+                          </div>
+                          {% if form.title.errors %}
+                            {% for error in form.title.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                      <div class="form-group form-float">
+                          <div class="form-line">
+                            <label class="form-label">{{form.content.label}}</label>
+                            {{ form.content }}
+                          </div>
+                          {% if form.content.errors %}
+                            {% for error in form.content.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                      <div class="form-group form-float">
+                          <div class="form-line">
+                            <label class="form-label">{{form.intro.label}}</label>
+                            {{ form.intro }}
+                          </div>
+                          {% if form.intro.errors %}
+                            {% for error in form.intro.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                  </div>
+
+                  <div class="col-sm-6">
+                      <div class="form-group form-float">
+                          <div class="form-line">
+                            <label class="form-label">{{form.start_date.label}}</label>
+                            {{ form.start_date }}
+                          </div>
+                          {% if form.start_date.errors %}
+                            {% for error in form.start_date.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                  </div>
+                  <div class="col-sm-6">
+                      <div class="form-group form-float">
+                          <div class="form-line">
+                            <label class="form-label">{{form.end_time.label}}</label>
+                            {{ form.end_time }}
+                          </div>
+                          {% if form.end_time.errors %}
+                            {% for error in form.end_time.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                  </div>
+
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <div class="form-line">
+                            {{ form.image }}
+                          </div>
+                          {% if form.image.errors %}
+                            {% for error in form.image.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                  </div>
+                  <div class="col-sm-6">
+                      <div class="form-group form-float">
+                          <div class="form-line">
+                            <label class="form-label">{{form.video_url.label}}</label>
+                            {{ form.video_url }}
+                          </div>
+                          <small>https://example.com</small>
+                          {% if form.video_url.errors %}
+                            {% for error in form.video_url.errors %}
+                              <span class="font-bold col-red">{{ error|escape }}</span>
+                            {% endfor %}
+                          {% endif %}
+                      </div>
+                  </div>
+              </div>
+              <hr>
+              <div class="text-right">
+                <button type="submit" class="btn btn-block btn-lg btn-success">Save</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script type="text/javascript">
+  $("#id_image").attr('accept', '.jpg,.gif');
+</script>
+{% endblock %}

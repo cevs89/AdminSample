@@ -1,0 +1,7 @@
+*.pyc*
+.env/*
+.venv/*
+*.conf
+*/media/*
+media/*
+*.sqlite3
